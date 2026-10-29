@@ -159,7 +159,7 @@ if(isBoss){
  const halo=new THREE.Mesh(new THREE.TorusGeometry(1.5,.045,8,48),wave===1?steel:gold);halo.rotation.x=Math.PI/2;halo.position.y=-.85;g.add(halo);
 }
 g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});scene.add(g);const hp=isBoss?65+wave*35:(type==='heavy'?4:2);return {g,type,isBoss,hp,maxHp:hp,speed:isBoss?.018+wave*.002:.025+Math.random()*.012,shotCD:80+Math.random()*90,radius:isBoss?1.55:.65,phase:Math.random()*6.28}}
-const bossNames=['IRON MONGER','WHIPLASH','ULTRON','CRIMSON DYNAMO','COSMIC WARLORD'];
+const bossNames=['IRON MONGER','WHIPLASH','ULTRON','CRIMSON DYNAMO','THANOS'];
 function spawnBoss(){if(boss||wave>5)return;boss=makeEnemy('boss',true);boss.name=bossNames[wave-1];boss.g.position.set((Math.random()-.5)*8,1.1,-8);bossUI.style.display='block';enemies=[];toastMsg('WARNING: '+boss.name);effect(boss.g.position,0xff8d45,45);ui()}
 function spawnEnemy(){if(boss||enemies.length>=5+wave)return;const heavy=Math.random()<.22+wave*.035;const e=makeEnemy(heavy?'heavy':'drone',false);e.g.position.set((Math.random()-.5)*24,.7,-12-Math.random()*10);enemies.push(e)}
 function fire(){if(!active||fireCD>0)return;fireCD=2;const origin=hero.position.clone().add(new THREE.Vector3(0,1.7,0));const dir=aimPoint.clone().sub(origin);if(dir.lengthSq()<.01)dir.set(0,0,-1);dir.normalize();const m=new THREE.Mesh(new THREE.SphereGeometry(.11,10,8),cyan);m.position.copy(origin).addScaledVector(dir,.72);scene.add(m);shots.push({m,v:dir.multiplyScalar(.82),life:55,damage:1,radius:.18});effect(m.position,0x5feaff,3)}
