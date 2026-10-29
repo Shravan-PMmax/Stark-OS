@@ -36,20 +36,20 @@
     };
     function loop(t){
       if(!running)return;var dt=Math.min((t-last)/16.67,2);last=t;var w=canvas.width,h=canvas.height;
-      ctx.clearRect(0,0,w,h);ctx.fillStyle='#07180f';ctx.fillRect(0,0,w,h);
-      for(var i=0;i<70;i++){var x=(i*173)%w,y=(i*97)%h;ctx.fillStyle=i%3?'#102d20':'#1a4530';ctx.beginPath();ctx.arc(x,y,12+(i%4)*5,0,Math.PI*2);ctx.fill()}
-      ctx.strokeStyle='#28563c';ctx.lineWidth=1;for(var g=0;g<8;g++){ctx.beginPath();ctx.moveTo(0,h*.2+g*h*.1);ctx.lineTo(w,h*.2+g*h*.1);ctx.stroke()}
+      ctx.clearRect(0,0,w,h);var bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#081b45');bg.addColorStop(.52,'#241044');bg.addColorStop(1,'#071e38');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+      for(var i=0;i<70;i++){var x=(i*173)%w,y=(i*97)%h;ctx.fillStyle=['#123e65','#176b67','#422b78','#6a2e83','#17613d'][i%5];ctx.beginPath();ctx.arc(x,y,12+(i%4)*5,0,Math.PI*2);ctx.fill()}
+      ctx.strokeStyle='#35f4ff55';ctx.lineWidth=1;for(var g=0;g<8;g++){ctx.beginPath();ctx.moveTo(0,h*.2+g*h*.1);ctx.lineTo(w,h*.2+g*h*.1);ctx.stroke()}
       var speed=5*dt;if(keys.a||keys.arrowleft)hero.x-=speed;if(keys.d||keys.arrowright)hero.x+=speed;if(keys.w||keys.arrowup)hero.y-=speed;if(keys.s||keys.arrowdown)hero.y+=speed;
       hero.x=Math.max(35,Math.min(w-35,hero.x));hero.y=Math.max(100,Math.min(h-35,hero.y));
       spawn+=dt;if(spawn>38){spawn=0;enemies.push({x:35+Math.random()*(w-70),y:-30,hp:2,r:18+Math.random()*10,speed:1+Math.random()*1.5})}
       if(fire&&shots.length<40&&Math.random()<.42){var a=Math.atan2(mouse.y-hero.y,mouse.x-hero.x);shots.push({x:hero.x,y:hero.y-12,vx:Math.cos(a)*11,vy:Math.sin(a)*11,life:55})}
-      for(var j=shots.length-1;j>=0;j--){var b=shots[j];b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;ctx.fillStyle='#72e8ff';ctx.shadowColor='#72e8ff';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(b.x,b.y,4,0,7);ctx.fill();ctx.shadowBlur=0;if(b.life<=0)shots.splice(j,1)}
-      for(var k=enemies.length-1;k>=0;k--){var e=enemies[k];e.y+=e.speed*dt;ctx.fillStyle='#9b3034';ctx.strokeStyle='#ffbd62';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,7);ctx.fill();ctx.stroke();ctx.fillStyle='#ffbd62';ctx.fillRect(e.x-6,e.y-3,12,6);
+      for(var j=shots.length-1;j>=0;j--){var b=shots[j];b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;ctx.fillStyle='#9cffff';ctx.shadowColor='#00cfff';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(b.x,b.y,4,0,7);ctx.fill();ctx.shadowBlur=0;if(b.life<=0)shots.splice(j,1)}
+      for(var k=enemies.length-1;k>=0;k--){var e=enemies[k];e.y+=e.speed*dt;ctx.fillStyle=['#ff2e83','#ff5c35','#a96bff','#ffbd35'][k%4];ctx.strokeStyle='#ffe04a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,7);ctx.fill();ctx.stroke();ctx.fillStyle='#ffbd62';ctx.fillRect(e.x-6,e.y-3,12,6);
         for(var q=shots.length-1;q>=0;q--){var z=shots[q];if(Math.hypot(z.x-e.x,z.y-e.y)<e.r+4){e.hp--;shots.splice(q,1);if(e.hp<=0){score+=100;enemies.splice(k,1)}break}}
         if(e.y>h+30)enemies.splice(k,1);
       }
-      ctx.save();ctx.translate(hero.x,hero.y);ctx.fillStyle='#8c2028';ctx.strokeStyle='#d99a3e';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,-35);ctx.lineTo(24,-12);ctx.lineTo(19,23);ctx.lineTo(0,31);ctx.lineTo(-19,23);ctx.lineTo(-24,-12);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#72e8ff';ctx.shadowColor='#72e8ff';ctx.shadowBlur=18;ctx.beginPath();ctx.arc(0,0,8,0,7);ctx.fill();ctx.restore();ctx.shadowBlur=0;
-      ctx.fillStyle='#e8fbff';ctx.font='bold 16px system-ui';ctx.fillText('STARK OS // EMERGENCY COMBAT MODE',22,35);ctx.font='13px system-ui';ctx.fillText('SCORE '+String(score).padStart(6,'0')+'     SUIT INTEGRITY '+hp+'%     WASD MOVE · HOLD CLICK TO FIRE',22,59);
+      ctx.save();ctx.translate(hero.x,hero.y);ctx.fillStyle='#e51f4b';ctx.strokeStyle='#ffe04a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,-35);ctx.lineTo(24,-12);ctx.lineTo(19,23);ctx.lineTo(0,31);ctx.lineTo(-19,23);ctx.lineTo(-24,-12);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#35f4ff';ctx.shadowColor='#35f4ff';ctx.shadowBlur=24;ctx.beginPath();ctx.arc(0,0,8,0,7);ctx.fill();ctx.restore();ctx.shadowBlur=0;
+      ctx.fillStyle='#ffffff';ctx.font='bold 16px system-ui';ctx.fillText('STARK OS // EMERGENCY COMBAT MODE',22,35);ctx.font='13px system-ui';ctx.fillText('SCORE '+String(score).padStart(6,'0')+'     SUIT INTEGRITY '+hp+'%     WASD MOVE · HOLD CLICK TO FIRE',22,59);
       var sEl=document.getElementById('score'),aEl=document.getElementById('armorText'),aFill=document.getElementById('armorFill');if(sEl)sEl.textContent=String(score).padStart(6,'0');if(aEl)aEl.textContent=hp+'%';if(aFill)aFill.style.width=hp+'%';
       raf=requestAnimationFrame(loop);
     }
