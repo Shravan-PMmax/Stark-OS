@@ -123,7 +123,41 @@ function makeEnemy(type='drone',isBoss=false){const g=new THREE.Group();let body
 if(type==='drone'){sphere(g,.48,bodyMat,0,0,0,1.2,.78,1);for(let s of [-1,1]){box(g,.6,.12,.18,steel,s*.66,0,0);sphere(g,.13,eyeMat,0,.05,.42,1,1,.5)}}
 else{box(g,isBoss?1.5:.8,isBoss?1.55:.9,isBoss?1.05:.7,bodyMat,0,0,0);sphere(g,isBoss?.48:.28,eyeMat,0,.22,isBoss?.57:.4,1,.7,.4);
 for(let s of [-1,1]){box(g,isBoss?.5:.28,isBoss?.9:.55,isBoss?.55:.32,bodyMat,s*(isBoss?1.05:.55),-.05,0);cylinder(g,isBoss?.22:.12,isBoss?.3:.18,isBoss?1.05:.6,steel,s*(isBoss?1.05:.55),-.7,0);sphere(g,isBoss?.24:.13,eyeMat,s*(isBoss?1.05:.55),-1.12,0)}}
-if(isBoss){const halo=new THREE.Mesh(new THREE.TorusGeometry(1.5,.045,8,48),gold);halo.rotation.x=Math.PI/2;halo.position.y=-.85;g.add(halo);const horn1=box(g,.22,.7,.22,gold,-.6,.9,0);horn1.rotation.z=-.4;const horn2=box(g,.22,.7,.22,gold,.6,.9,0);horn2.rotation.z=.4}
+if(isBoss){
+ if(wave===1){
+   const ironEdge=mat(0x75818b,.96,.18),amber=mat(0xffbd42,.35,.15,0xff8a13);
+   box(g,1.9,.28,1.15,ironEdge,0,.62,0);
+   box(g,1.35,.58,.16,bodyMat,0,.02,.61);
+   const chestRing=new THREE.Mesh(new THREE.TorusGeometry(.3,.075,10,28),ironEdge);chestRing.position.set(0,.12,.72);g.add(chestRing);
+   const chestCore=new THREE.Mesh(new THREE.CircleGeometry(.22,28),amber);chestCore.position.set(0,.12,.735);g.add(chestCore);
+   for(const side of [-1,1]){
+     box(g,.84,.58,.88,bodyMat,side*1.12,.43,0);
+     box(g,.72,.16,.9,ironEdge,side*1.12,.78,0);
+     sphere(g,.1,amber,side*.22,.31,.73,1,.8,.5);
+   }
+   cylinder(g,.34,.42,.86,bodyMat,.98,-.65,.15,12);
+   const cannonRing=new THREE.Mesh(new THREE.TorusGeometry(.22,.05,8,20),amber);cannonRing.position.set(.98,-1.12,.18);g.add(cannonRing);
+   box(g,.38,.5,.44,bodyMat,-.98,-.65,.1);
+ }else if(wave===2){
+   const coil=mat(0xff4c25,.35,.18,0xff2600);
+   for(const side of [-1,1]){const ring=new THREE.Mesh(new THREE.TorusGeometry(.34,.09,8,24),coil);ring.position.set(side*1.05,.18,.42);g.add(ring);const whip=new THREE.Mesh(new THREE.CylinderGeometry(.035,.055,2.4,8),coil);whip.position.set(side*1.4,-.15,.12);whip.rotation.z=side*.35;g.add(whip)}
+ }else if(wave===3){
+   const silver=mat(0xd5dbe0,.96,.15),redEye=mat(0xff2038,.25,.15,0xff001d);
+   box(g,.82,.56,.18,silver,0,.27,.64);box(g,.62,.075,.05,redEye,0,.3,.76);
+   for(const side of [-1,1]){const blade=box(g,.14,.55,.13,silver,side*.28,.87,.1);blade.rotation.z=side*-.22}
+ }else if(wave===4){
+   const redArmor=mat(0xa3202b,.9,.2),hot=mat(0xff5938,.3,.15,0xff321c);
+   box(g,1.6,.38,.22,redArmor,0,.5,.59);
+   const core=new THREE.Mesh(new THREE.TorusGeometry(.3,.07,8,24),steel);core.position.set(0,.16,.72);g.add(core);
+   const glow=new THREE.Mesh(new THREE.CircleGeometry(.2,24),hot);glow.position.set(0,.16,.735);g.add(glow);
+ }else{
+   const purple=mat(0x4b2c78,.82,.22),cosmicGold=mat(0xd6aa4c,.9,.2);
+   box(g,1.9,.28,.3,cosmicGold,0,.64,.38);box(g,1.2,.7,.2,purple,0,.04,.66);
+   const gem=new THREE.Mesh(new THREE.OctahedronGeometry(.22,0),mat(0x9b62ff,.3,.15,0x5720ff));gem.position.set(0,.22,.82);g.add(gem);
+   for(const side of [-1,1])box(g,.78,.65,.8,purple,side*1.12,.46,0);
+ }
+ const halo=new THREE.Mesh(new THREE.TorusGeometry(1.5,.045,8,48),wave===1?steel:gold);halo.rotation.x=Math.PI/2;halo.position.y=-.85;g.add(halo);
+}
 g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});scene.add(g);const hp=isBoss?65+wave*35:(type==='heavy'?4:2);return {g,type,isBoss,hp,maxHp:hp,speed:isBoss?.018+wave*.002:.025+Math.random()*.012,shotCD:80+Math.random()*90,radius:isBoss?1.55:.65,phase:Math.random()*6.28}}
 const bossNames=['IRON MONGER','WHIPLASH','ULTRON','CRIMSON DYNAMO','COSMIC WARLORD'];
 function spawnBoss(){if(boss||wave>5)return;boss=makeEnemy('boss',true);boss.name=bossNames[wave-1];boss.g.position.set((Math.random()-.5)*8,1.1,-8);bossUI.style.display='block';enemies=[];toastMsg('WARNING: '+boss.name);effect(boss.g.position,0xff8d45,45);ui()}
