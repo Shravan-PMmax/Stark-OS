@@ -11,6 +11,61 @@
 <div id="toast">BOSS ELIMINATED</div><div id="vrNotice">DESKTOP BUILD · KEYBOARD + MOUSE CONTROLS</div>
 <div id="overlay"><div class="menu" id="menu"><div class="eyebrow">STARK INDUSTRIES // COMBAT SIMULATION</div><h1>ARMORED<br><span>PROTOCOL.</span></h1><p>A hostile machine signal has awakened inside the Emerald Exclusion Zone. Take flight in a red-and-gold powered suit, scan the forest, and dismantle five increasingly dangerous enemy machines.</p><div class="line"></div><div class="controls"><span><i class="key">W A S D</i> MOVE</span><span><i class="key">MOUSE</i> AIM</span><span><i class="key">HOLD CLICK</i> CHARGE BEAM</span><span><i class="key">RELEASE</i> FIRE</span><span><i class="key">SHIFT</i> DASH</span></div><button class="btn" id="start">POWER UP THE SUIT ↗</button><p class="foot">IMMERSIVE FLIGHT SIM · CHARGED REPULSORS · FIVE BOSSES</p></div></div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js"}}</script>
+
+<script>
+(function(){
+  var ready=false, fallbackReady=false, running=false, canvas,ctx,raf=0,last=0,score=0,hp=100,hero={x:0,y:0},keys={},shots=[],enemies=[],mouse={x:0,y:0},fire=false,spawn=0;
+  window.__starkSetReady=function(){ready=true;};
+  function buildFallback(){
+    if(fallbackReady)return; fallbackReady=true;
+    canvas=document.createElement('canvas');canvas.id='starkFallbackCanvas';
+    canvas.style.cssText='position:fixed;inset:0;width:100%;height:100%;z-index:3;display:none;touch-action:none';
+    document.body.appendChild(canvas);ctx=canvas.getContext('2d');
+    function resize(){canvas.width=innerWidth;canvas.height=innerHeight;hero.x=canvas.width/2;hero.y=canvas.height*.72;mouse.x=canvas.width/2;mouse.y=canvas.height*.3}
+    resize();addEventListener('resize',resize);
+    addEventListener('keydown',function(e){keys[e.key.toLowerCase()]=true;if([' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))e.preventDefault()});
+    addEventListener('keyup',function(e){keys[e.key.toLowerCase()]=false});
+    canvas.addEventListener('pointermove',function(e){var r=canvas.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top});
+    canvas.addEventListener('pointerdown',function(){fire=true});addEventListener('pointerup',function(){fire=false});
+    window.__starkFallbackStart=function(){
+      if(running)return;running=true;score=0;hp=100;shots=[];enemies=[];spawn=0;
+      document.getElementById('overlay').style.display='none';
+      var err=document.getElementById('runtimeError');if(err)err.style.display='none';
+      canvas.style.display='block';last=performance.now();raf=requestAnimationFrame(loop);
+    };
+    function loop(t){
+      if(!running)return;var dt=Math.min((t-last)/16.67,2);last=t;var w=canvas.width,h=canvas.height;
+      ctx.clearRect(0,0,w,h);ctx.fillStyle='#07180f';ctx.fillRect(0,0,w,h);
+      for(var i=0;i<70;i++){var x=(i*173)%w,y=(i*97)%h;ctx.fillStyle=i%3?'#102d20':'#1a4530';ctx.beginPath();ctx.arc(x,y,12+(i%4)*5,0,Math.PI*2);ctx.fill()}
+      ctx.strokeStyle='#28563c';ctx.lineWidth=1;for(var g=0;g<8;g++){ctx.beginPath();ctx.moveTo(0,h*.2+g*h*.1);ctx.lineTo(w,h*.2+g*h*.1);ctx.stroke()}
+      var speed=5*dt;if(keys.a||keys.arrowleft)hero.x-=speed;if(keys.d||keys.arrowright)hero.x+=speed;if(keys.w||keys.arrowup)hero.y-=speed;if(keys.s||keys.arrowdown)hero.y+=speed;
+      hero.x=Math.max(35,Math.min(w-35,hero.x));hero.y=Math.max(100,Math.min(h-35,hero.y));
+      spawn+=dt;if(spawn>38){spawn=0;enemies.push({x:35+Math.random()*(w-70),y:-30,hp:2,r:18+Math.random()*10,speed:1+Math.random()*1.5})}
+      if(fire&&shots.length<40&&Math.random()<.42){var a=Math.atan2(mouse.y-hero.y,mouse.x-hero.x);shots.push({x:hero.x,y:hero.y-12,vx:Math.cos(a)*11,vy:Math.sin(a)*11,life:55})}
+      for(var j=shots.length-1;j>=0;j--){var b=shots[j];b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;ctx.fillStyle='#72e8ff';ctx.shadowColor='#72e8ff';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(b.x,b.y,4,0,7);ctx.fill();ctx.shadowBlur=0;if(b.life<=0)shots.splice(j,1)}
+      for(var k=enemies.length-1;k>=0;k--){var e=enemies[k];e.y+=e.speed*dt;ctx.fillStyle='#9b3034';ctx.strokeStyle='#ffbd62';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,7);ctx.fill();ctx.stroke();ctx.fillStyle='#ffbd62';ctx.fillRect(e.x-6,e.y-3,12,6);
+        for(var q=shots.length-1;q>=0;q--){var z=shots[q];if(Math.hypot(z.x-e.x,z.y-e.y)<e.r+4){e.hp--;shots.splice(q,1);if(e.hp<=0){score+=100;enemies.splice(k,1)}break}}
+        if(e.y>h+30)enemies.splice(k,1);
+      }
+      ctx.save();ctx.translate(hero.x,hero.y);ctx.fillStyle='#8c2028';ctx.strokeStyle='#d99a3e';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,-35);ctx.lineTo(24,-12);ctx.lineTo(19,23);ctx.lineTo(0,31);ctx.lineTo(-19,23);ctx.lineTo(-24,-12);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle='#72e8ff';ctx.shadowColor='#72e8ff';ctx.shadowBlur=18;ctx.beginPath();ctx.arc(0,0,8,0,7);ctx.fill();ctx.restore();ctx.shadowBlur=0;
+      ctx.fillStyle='#e8fbff';ctx.font='bold 16px system-ui';ctx.fillText('STARK OS // EMERGENCY COMBAT MODE',22,35);ctx.font='13px system-ui';ctx.fillText('SCORE '+String(score).padStart(6,'0')+'     SUIT INTEGRITY '+hp+'%     WASD MOVE · HOLD CLICK TO FIRE',22,59);
+      var sEl=document.getElementById('score'),aEl=document.getElementById('armorText'),aFill=document.getElementById('armorFill');if(sEl)sEl.textContent=String(score).padStart(6,'0');if(aEl)aEl.textContent=hp+'%';if(aFill)aFill.style.width=hp+'%';
+      raf=requestAnimationFrame(loop);
+    }
+  }
+  buildFallback();
+  setTimeout(function(){
+    if(!ready){
+      var n=document.getElementById('vrNotice');if(n)n.textContent='3D ENGINE UNAVAILABLE · BACKUP MODE WILL START';
+      var p=document.getElementById('runtimeError');
+      if(!p){p=document.createElement('div');p.id='runtimeError';p.style.cssText='position:fixed;z-index:7;left:12px;right:12px;bottom:12px;padding:10px 14px;background:#17231c;color:#dffaff;border:1px solid #39ffad;font:12px/1.4 system-ui';document.body.appendChild(p)}
+      p.textContent='3D mode could not load. Click POWER UP THE SUIT to launch the built-in playable backup.';
+      document.addEventListener('click',function(e){if(!ready&&e.target&&e.target.id==='start'){e.preventDefault();e.stopImmediatePropagation();window.__starkFallbackStart()}},true);
+    }
+  },2500);
+})();
+</script>
+
 <script type="module">
 import * as THREE from 'three';
 const root=document.querySelector('#game');
@@ -99,7 +154,7 @@ for(let i=enemyShots.length-1;i>=0;i--){const s=enemyShots[i],prev=s.m.position.
 function updateEffects(){for(let i=chargedBeams.length-1;i>=0;i--){const b=chargedBeams[i];b.life--;b.mat.opacity=Math.max(0,b.life/12);if(b.life<=0){scene.remove(b.mesh);b.mesh.geometry.dispose();b.mat.dispose();chargedBeams.splice(i,1)}}for(let i=effects.length-1;i>=0;i--){const e=effects[i];e.position.add(e.userData.v);e.userData.life--;e.scale.multiplyScalar(.975);if(e.userData.life<=0){scene.remove(e);effects.splice(i,1)}}}
 function animate(){frame++;updateAim();if(active){updateCharacter();updateEnemies();updateProjectiles();updateEffects();if(frame%12===0)ui()}const target=new THREE.Vector3(hero.position.x,0,hero.position.z);camera.position.lerp(new THREE.Vector3(hero.position.x,11.5+flightY*.35,hero.position.z+14+flightY*.45),.075);camera.lookAt(target.x,flightY*.35,target.z-2);renderer.render(scene,camera)}
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-renderer.setAnimationLoop(animate);
+renderer.setAnimationLoop(animate);window.__starkSetReady();
 </script>
 <script>
 (function(){
